@@ -1,9 +1,28 @@
-from fastapi import FastAPI, Query, Path, Form
+from fastapi import FastAPI, Query, Path, Form, File, UploadFile
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+import os
 app = FastAPI()
 
 '''Upload file using fast api and save it into folder'''
+# define the folder path where the uploaded files will be saved
+UPLOADS_FOLDER = "uploads"
 
+# Create uploads folder if it doesn't exists
+os.makedirs(UPLOADS_FOLDER, exist_ok=True)
+
+
+# Route handler for handling POST requests to /uploads_file/
+@app.post("/uploads_file/")
+async def upload_file(file: UploadFile = File(...)):
+    # Access the uploaded file using the UploadFile parameter
+    # You can then use the file as needed, such as saving it, processing it ,etc.
+    file_path = os.path.join(UPLOADS_FOLDER, file.filename)
+    with open(file_path, "wb") as buffer:
+        buffer.write(await file.read())
+    # return a response indicating success and file details.
+    return JSONResponse(content={"message": "File uploaded successfully", "filename": file.filename, 
+    "content_type": file.content_type})
 
 '''Accessing Form data'''
 # @app.post("/submit_form/")
